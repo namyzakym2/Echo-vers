@@ -1,0 +1,44 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    // Collection: users
+    // Fields: xp (int), level (int), lastMessage (string)
+    //
+    // Collection: commands
+    // Fields: originalName (string), customName (string)
+    // ===============================================================
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && 
+        (request.auth.token.email == "namyzakym@gmail.com" && request.auth.token.email_verified == true);
+    }
+
+    match /users/{userId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+
+    match /commands/{commandId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+
+    match /requests/{requestId} {
+      allow read: if isAdmin();
+      allow create: if isAuthenticated();
+      allow update, delete: if isAdmin();
+    }
+
+    match /backups/{guildId} {
+      allow read, write: if isAdmin();
+    }
+  }
+}

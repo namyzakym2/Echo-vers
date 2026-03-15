@@ -1,0 +1,69 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User leveling and XP data",
+      "type": "object",
+      "properties": {
+        "xp": { "type": "integer", "description": "Current experience points" },
+        "level": { "type": "integer", "description": "Current level" },
+        "lastMessage": { "type": "string", "format": "date-time", "description": "Timestamp of last message for XP cooldown" }
+      },
+      "required": ["xp", "level"]
+    },
+    "Command": {
+      "title": "Command",
+      "description": "Custom command mapping",
+      "type": "object",
+      "properties": {
+        "originalName": { "type": "string", "description": "Original command name" },
+        "customName": { "type": "string", "description": "User-defined command name" },
+        "response": { "type": "string", "description": "Text response for custom commands" },
+        "type": { "type": "string", "enum": ["alias", "custom"], "description": "Type of command" }
+      },
+      "required": ["originalName", "customName"]
+    },
+    "FeatureRequest": {
+      "title": "FeatureRequest",
+      "description": "Requests for new features from Discord",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "username": { "type": "string" },
+        "request": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "implemented"] },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "request", "status", "timestamp"]
+    },
+    "Backup": {
+      "title": "Backup",
+      "description": "Server state backup",
+      "type": "object",
+      "properties": {
+        "roles": { "type": "array" },
+        "channels": { "type": "array" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["roles", "channels", "timestamp"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User data"
+    },
+    "/commands/{commandId}": {
+      "schema": "Command",
+      "description": "Command aliases and custom commands"
+    },
+    "/requests/{requestId}": {
+      "schema": "FeatureRequest",
+      "description": "Feature requests"
+    },
+    "/backups/{guildId}": {
+      "schema": "Backup",
+      "description": "Server backups"
+    }
+  }
+}

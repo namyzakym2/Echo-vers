@@ -1,0 +1,5 @@
+{
+  "name": "Discord Bot Manager",
+  "description": "A dashboard to manage and monitor your Discord bot with real-time status and command configuration.",
+  "requestFramePermissions": []
+}
