@@ -173,6 +173,30 @@ async function startServer() {
 
   loginBot();
 
+  // Voice XP Tracking
+  setInterval(async () => {
+    for (const [userId, joinTime] of voiceJoinTimes.entries()) {
+      // Find the member in all guilds
+      let foundMember = null;
+      for (const guild of client.guilds.cache.values()) {
+        const member = guild.members.cache.get(userId);
+        if (member && member.voice.channelId) {
+          foundMember = member;
+          break;
+        }
+      }
+      
+      if (foundMember) {
+        await addXp(userId, foundMember.user.username, foundMember.user.displayAvatarURL(), 2);
+        voiceJoinTimes.set(userId, Date.now()); // Reset join time
+        addLog(`Added 2 XP to ${foundMember.user.username} for voice activity.`);
+      } else {
+        // User might have left or bot lost track
+        voiceJoinTimes.delete(userId);
+      }
+    }
+  }, 60000);
+
   client.on("voiceStateUpdate", async (oldState, newState) => {
     const userId = newState.id;
     if (newState.member?.user.bot) return;
@@ -183,16 +207,7 @@ async function startServer() {
     }
     // Left a channel
     else if (oldState.channelId && !newState.channelId) {
-      const joinTime = voiceJoinTimes.get(userId);
-      if (joinTime) {
-        const duration = (Date.now() - joinTime) / 60000; // minutes
-        if (duration > 1) { // Only count if > 1 min
-          const xp = Math.floor(duration * 2); // 2 XP per minute
-          await addXp(userId, newState.member!.user.username, newState.member!.user.displayAvatarURL(), xp);
-          addLog(`Added ${xp} XP to ${newState.member!.user.username} for voice activity.`);
-        }
-        voiceJoinTimes.delete(userId);
-      }
+      voiceJoinTimes.delete(userId);
     }
   });
 
